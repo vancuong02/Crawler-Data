@@ -1,0 +1,68 @@
+{
+  "brand": "Bosch",
+  "manualLang": "en",
+  "name": "Bosch HSG656XB6A Built-in oven with steam function",
+  "model": "HSG656XB6A",
+  "related_models": [
+    "Model1", //thường là mpn,sku. Những model liên quan ở đây được hiểu là mã số khác của sản phẩm hoặc Sản phẩm liên quan có chung tài liệu.
+    "Model2",
+  ]
+  "modelAlias": [
+    "Model1", //thường là mpn,sku. Dữ liệu này giúp hệ thống tránh trùng, được hiểu là mã số khác của sản phẩm.
+    "Model2",
+  ]  
+  "images": [
+    "https://media3.bosch-home.com/Product_Shots/1600x900/MCSA03311179_HSG656XB6A_BuiltInOven_Bosch_STP_IC6_def.png"
+  ],
+  "category": "TheTestCategory",
+  "numOfRelatedUrls": 2,
+
+  "manualsUrl": "https://media3.bosch-home.com/Documents/9001659189_C.pdf", //Đây là tài liệu chính, được ưu tiên theo thứ tự: User manual, User guide ...; Installation Guide, installation manual .... . Chú ý ko đưa specs, dimension, warratty... vào mục này.
+  "fileType": "User Manual", loại file của manualsUrl. Xác định qua hàm findTypeOfFileFromString();
+  "manualsTitle": "Bosch ABCXYZ User Manual", //Tên hiển thị của tài liệu.
+
+  "otherFiles": [ //Đây là các file khác.
+    {
+      "name": "Product Information",
+      "url": "https://media3.bosch-home.com/Documents/specsheet/en-AU/HSG656XB6A.pdf",
+      "lang": "en",
+      "type": "origin",
+      "fileType": "User Manual"
+    },
+    {
+      "name": "Home Connect Guide",
+      "url": "https://media3.bosch-home.com/Documents/9001504083_F.pdf",
+      "lang": "en",
+      "type": "origin",
+      "fileType": "User Manual"
+    },
+    {
+      "name": "Information regarding free and open source software",
+      "url": "https://media3.bosch-home.com/Documents/9001276698_B.pdf",
+      "lang": "en",
+      "type": "origin",
+      "fileType": "User Manual"
+    },
+    {
+      "name": "Information regarding free and open source software",
+      "url": "https://media3.bosch-home.com/Documents/9000968461_F.pdf",
+      "lang": "en",
+      "type": "origin",
+      "fileType": "User Manual"
+    }
+  ],
+  "specifications": [
+    {
+        "name": "Product Title",
+        "value": "Smart Humidifier Max"
+    },
+    {
+        "name": "Capacity",
+        "value": "7L"
+    },
+    {
+        "name": "Effective Area",
+        "value": "107-750ft²"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+Các trường yêu cầu bắt buộc phải có, nếu không xác định được các trường này thì không cần viết cho web đó.
+- name
+- model
+- manualsUrl
+
+
+Trường Brand: Nếu đây là 1 website chỉ có 1 brand (website nhà sản xuất), ta sẽ chỉ định rõ Brand cho nó. Như trong ví dụ $data['brand'] = 'Bosch';
+- Nếu là web có nhiều brands (như web bán hàng, hoăc nhà sản xuất có nhiều thương hiệu), thì dùng findBrandFromString() để xác định. Hàm này chạy Online nên không chuyển cho em được. Cơ bản, em cần tìm được đoạn text có chưa tến Brand để truyền vào: Ví dụ tên cụ thể brand, hoặc brand thường nằm trong name...
+
+Trường Category: Trường này sẽ do function findCategoryFromName() xác định. Func này chạy online, nên em có thể truyền từ Name hoặc Description vào. 
+Trường Images: 1 images.
+Otherfiles: Cần giữ đúng cấu trúc.
+numOfRelatedUrls: Tìm các link sản phẩm khác trong html qua function extract_getRelatedProducts() 
+
+### Quy tắc đặt tên file:
+
+Domain.php  với các dấu chấm (.) chuyển thành từ Dot: ví dụ bosch.co.uk -> boschDotcoDotuk.php 
+
+Tên functions: cũng như tên file. nó được ghép với các đuôi:
+- _updateBySitemap : Cho function lấy link sitemap.
+- _updateManualPages : Cho function lấy link từ page manuals.
+- _updateByWebsite : cho function lấy link từ web.
+- _checkLink : CHo function kiểm tra link product.
+- _extractManuals : Cho function extract dữ liệu product.
+
+Nếu domain bắt đầu là số thì thêm "number_" vào đầu function. Ví dụ domain 1bosch.com -> number_1boschDotcom_extractManualls() 
+
+
+
