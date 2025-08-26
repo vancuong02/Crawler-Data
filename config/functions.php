@@ -280,3 +280,37 @@ function parseURL($url, $retdata = true)
         return true;
     }
 }
+
+// Config
+function curl_get_v4($url, $headers = array())
+{
+    $ch = curl_init();
+    $headerDf = array(
+        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language: en-US,en;q=0.9',
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+    );
+
+    if (empty($headers)) $headers = $headerDf;
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_ENCODING, "");
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 60);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+
+    $result = curl_exec($ch);
+
+    if ($result === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        throw new Exception("cURL error: $error");
+    }
+
+    curl_close($ch);
+    return $result;
+}

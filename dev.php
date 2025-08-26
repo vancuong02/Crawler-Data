@@ -1,5 +1,5 @@
 <?php
-$SCRIPT_FOLDER = '/var/www/html/crawler/';
+$SCRIPT_FOLDER = __DIR__ . '/';
 include $SCRIPT_FOLDER . 'config/functions.php';
 include $SCRIPT_FOLDER . 'config/functions_extract.php';
 include $SCRIPT_FOLDER . 'config/functions_fake.php';
@@ -13,12 +13,12 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://shop.moen.com/products/gxp50c';
+$url = 'https://zoellerpumps.com/product/model-49-sump-pump';
 
 $type = 'extract';
-//$type = 'updateBySitemap';
-//$type = 'updateManualPages';
-//$type = 'updateByWebsite';
+// $type = 'updateBySitemap';
+// $type = 'updateManualPages';
+// $type = 'updateByWebsite';
 
 
 $testCurl = 'No';
