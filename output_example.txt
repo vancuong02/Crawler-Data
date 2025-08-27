@@ -1,8 +1,10 @@
 {
   "brand": "Bosch",
   "manualLang": "en",
+  "numOfRelatedUrls": 2,
+
   "name": "Bosch HSG656XB6A Built-in oven with steam function",
-  "model": "HSG656XB6A",
+  "model": "HSG656XB6A", // Mã của sản phẩm, nếu không có model, lấy SKU.
   "related_models": [
     "Model1", //thường là mpn,sku. Những model liên quan ở đây được hiểu là mã số khác của sản phẩm hoặc Sản phẩm liên quan có chung tài liệu.
     "Model2",
@@ -15,7 +17,6 @@
     "https://media3.bosch-home.com/Product_Shots/1600x900/MCSA03311179_HSG656XB6A_BuiltInOven_Bosch_STP_IC6_def.png"
   ],
   "category": "TheTestCategory",
-  "numOfRelatedUrls": 2,
 
   "manualsUrl": "https://media3.bosch-home.com/Documents/9001659189_C.pdf", //Đây là tài liệu chính, được ưu tiên theo thứ tự: User manual, User guide ...; Installation Guide, installation manual .... . Chú ý ko đưa specs, dimension, warratty... vào mục này.
   "fileType": "User Manual", loại file của manualsUrl. Xác định qua hàm findTypeOfFileFromString();

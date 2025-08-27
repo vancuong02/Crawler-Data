@@ -1,89 +1,108 @@
 <?php
-function ninjakitchenDotcoDotuk_updateBySitemap($monthsAgo = 3)
+// Website 1. https://www.audiotec-fischer.de/en/helix/accessories/hec-hd-audio-usb-interface
+
+function audiotec_fischerDotde_updateBySitemap($monthsAgo = 3)
 {
-    //Tìm sitemap qua robots.txt. ví dụ: https://ninjakitchen.co.uk/robots.txt
-    $urls = array();
-    $urlMaps = array('https://ninjakitchen.co.uk/sitemap-ninja');
-    for ($m = 0; $m < count($urlMaps); $m++) {
-        $html = curl_get($urlMaps[$m]);
-        $xml = new SimpleXMLElement($html);
-        foreach ($xml->sitemap as $item) {
-            if (!isset($item->loc)) continue;
-            $url = (string)$item->loc;
-            if (!preg_match("/product/i", $url)) continue;
-            array_push($urls, $url);
-        }
-    }
-    $resultData = extract_bySitemap($urls, 'ninjakitchenDotcoDotuk_checkLink', $monthsAgo, 1, 'curl_get');
-
-    // echo "Total link product: " . count($resultData) . PHP_EOL;
-    // foreach ($resultData as $link) {
-    //     echo $link . PHP_EOL;
-    // }
-
+    $urls = array('https://www.audiotec-fischer.de/web/sitemap/shop-3/sitemap-1.xml.gz');
+    $resultData = extract_bySitemap($urls, 'audiotec_fischerDotde_checkLink', $monthsAgo, 1, 'curl_get_v4', "", "Yes");
     return $resultData;
 }
 
-function ninjakitchenDotcoDotuk_checkLink($link, $urlInfo)
+function audiotec_fischerDotde_checkLink($link, $urlInfo)
 {
-    //https://ninjakitchen.co.uk/product/ninja-protein-power-pack-creami-blast-bundle-zidNC51BC25UK
+    // https://www.audiotec-fischer.de/en/helix/accessories/hec-hd-audio-usb-interface
     if (!isset($link) || !isset($urlInfo)) return false;
     if (!$urlInfo || !isset($urlInfo['domain'])) return false;
-    if (!preg_match("/ninjakitchen\.co\.uk/i", $urlInfo['domain'])) return false;
-    if (!preg_match("/\/product\//i", $link)) return false;
+    if (!preg_match("/audiotec-fischer\.de/i", $urlInfo['domain'])) return false;
+
     $link = explode('?', $link)[0];
-    return explode('#', $link)[0];
+    $link = explode('#', $link)[0];
+
+    // loại bỏ link thuộc news, blog, brands, product-archive, listing, tools
+    if (preg_match("~/(news|blog|brands|product-archive|media|knowledge-base|listing|tools)~i", $link)) {
+        return false;
+    }
+
+    // Chỉ giữ link có ít nhất 3 cấp sau /en/
+    // format: /en/<brand>/<category>/<product-slug>
+    $path = parse_url($link, PHP_URL_PATH);
+
+    // Không nhận URL kết thúc bằng "/"
+    if (substr($path, -1) === '/') {
+        return false;
+    }
+
+    $segments = array_values(array_filter(explode('/', trim($path, '/'))));
+
+    if (!isset($segments[0]) || strtolower($segments[0]) !== 'en') {
+        return false;
+    }
+    if (count($segments) < 4) {
+        return false;
+    }
+
+    return $link;
 }
 
-function ninjakitchenDotcoDotuk_extractManuals($url, $runAuto = 'Yes')
+
+
+function audiotec_fischerDotde_extractManuals($url, $runAuto = 'Yes')
 {
     /*
-    - https://ninjakitchen.co.uk/product/ninja-protein-power-pack-creami-blast-bundle-zidNC51BC25UK
-    - Edit: 2023-09-05
-    - Edit 2025-08-26
+    - https://www.audiotec-fischer.de/en/helix/accessories/hec-hd-audio-usb-interface
+    - Create 2025-08-26
     */
-    $data = array('brand' => 'Ninja', 'manualLang' => 'en');
+
+    $data = array('brand' => 'Audiotec Fischer', 'manualLang' => 'en');
     $domainUrl = getWebsiteUrl($url);
     if (!$domainUrl) return $data;
 
-    $html = curl_get($url);
-    $data['numOfRelatedUrls'] = count(extract_getRelatedProducts($html, 'ninjakitchenDotcoDotuk_checkLink', $domainUrl, 0));
+    $html = curl_get_v4($url);
+    // 1. numOfRelatedUrls
+    $data['numOfRelatedUrls'] = count(extract_getRelatedProducts($html, 'audiotec_fischerDotde_checkLink', $domainUrl, 0));
 
-    //Name
+    // 2. Name
     $data['name'] = get_string_between($html, '<h1', '</h1>');
     if ($data['name'] != '') $data['name'] = '<h1' . $data['name'];
     $data['name'] = extract_clearName($data['name']);
     if (!$data['name']) return $data;
 
-    //Model
-    $data['model'] = get_string_between($html, '"sku" : "', '"');
+    // 3. Model
+    $data['model'] = get_string_between($html, '<span itemprop="sku" content="', '"');
     $data['model'] = extract_clearModel($data['model']);
     if ($runAuto == 'Yes' && !$data['model']) return $data;
 
     $data = extract_checkNameAndBrand($data);
 
-    //Related Model:
+    // 4. Related Model - Model Alias
     if ($data['model']) {
-        $related_model = preg_replace('/UK$/i', '', $data['model']);
-        if ($related_model != $data['model']) $data['related_models'] = array($related_model);
+        $related = [];
+        // Lấy mã thị trường Đức (WEEE-Reg.-Nr.)
+        $weee = get_string_between($html, '<span class="entry--content" itemprop="weee">', '</span>');
+        if ($weee != '') $related[] = extract_clearModel($weee);
+
+        if (count($related) > 0) {
+            $data['related_models'] = $related;
+            $data['modelAlias'] = $related; // alias copy from related
+        }
     }
 
-    //Imagesecho $data['model'] ."\n";
-    $img = get_string_between($html, '<meta property="og:image:secure_url" content="', '"');
+    // 5. Image
+    $img = get_string_between($html, '<meta property="og:image" content="', '"');
     if ($img != '') {
         if (substr($img, 0, 2) == '//') $img = 'https:' . $img;
         if (substr($img, 0, 1) == '/') $img = $domainUrl . $img;
         $data['images'] = array(extract_clearUrl($img));
     }
 
-    //Category
+    // 6. Category
     $category = findCategoryFromName($data['name']);
     if ($category) $data['category'] = $category;
-    if (!isset($data['category'])) $data['category'] = 'Kitchen & Bath Fixtures';
+    if (!isset($data['category'])) $data['category'] = 'Helix';
 
-    //manual
+    // 7. Manual & OtherFiles
     $checkFileExist = array();
-    $manualHtml = get_string_between($html, '<ul class="product-attachments">', '</ul>');
+    $manualHtml = get_string_between($html, '<ul class="content--list list--unstyled">', '</ul>');
     preg_match_all('/<a(.*?)<\/a>/s', $manualHtml, $m);
     if ($m != false) {
         for ($j = 0; $j < count($m[0]); $j++) {
@@ -124,24 +143,31 @@ function ninjakitchenDotcoDotuk_extractManuals($url, $runAuto = 'Yes')
         }
     }
 
-    //ReDetect manualsUrl.
+    // 8. Specifications
     $data = extract_recheckManualsUrl($data);
-
     $spec = array();
-    preg_match_all('/<dd(.*?)<\/dt>/s', $html, $m);
-    for ($j = 0; $j < count($m[0]); $j++) {
-        $item = $m[0][$j];
-        $itemData = array();
-        $itemData['name'] = get_string_between($item, '<dd class="col-xs-8 ish-ca-value">', '</dd>');
-        $itemData['name'] = extract_clearItemFileName($itemData['name']);
-        if ($itemData['name'] == '') continue;
+    preg_match_all('/<tr>(.*?)<\/tr>/s', $html, $rows);
+    foreach ($rows[1] as $row) {
+        $name = get_string_between($row, '<strong>', '</strong>');
+        $name = extract_clearItemFileName($name);
+        if ($name == '') continue;
 
-        $itemData['value'] = get_string_between($item, '<dt class="col-xs-4 ish-ca-type">', '</dt>');
-        $itemData['value'] = extract_clearItemFileName($itemData['value']);
-        if ($itemData['value'] == '' || $itemData['value'] == 'No' || $itemData['value'] == 'N/A') continue;
-        array_push($spec, $itemData);
+        $value = get_string_between($row, '</td>', '</td>');
+        preg_match_all('/<td[^>]*>(.*?)<\/td>/s', $row, $cols);
+
+        if (count($cols[1]) < 2) continue;
+        $value = extract_clearItemFileName($cols[1][1]);
+        if ($value == '' || $value == 'No' || $value == 'N/A') continue;
+
+        $itemData = array(
+            'name' => $name,
+            'value' => $value
+        );
+        $spec[] = $itemData;
     }
-    if (count($spec) > 0) $data['specifications'] = $spec;
+    if (count($spec) > 0) {
+        $data['specifications'] = $spec;
+    }
 
     return $data;
 }

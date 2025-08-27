@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://zoellerpumps.com/product/model-49-sump-pump';
+$url = 'https://www.audiotec-fischer.de/en/helix/accessories/hec-hd-audio-usb-interface';
 
 $type = 'extract';
 // $type = 'updateBySitemap';
