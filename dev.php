@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://www.audiotec-fischer.de/en/helix/accessories/hec-hd-audio-usb-interface';
+$url = 'https://fhiaba.com/product/35133220/fridge-and-freezer';
 
 $type = 'extract';
 // $type = 'updateBySitemap';
