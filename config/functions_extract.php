@@ -107,3 +107,26 @@ function lookup_langCode_fromLangeCode3Chars($str)
     if (isset($langs3Chars[$str])) return $langs3Chars[$str];
     return false;
 }
+
+// Hàm xử lý lọc Name sau khi đã extract_clearName
+function check_clearName($name)
+{
+    if (!$name) return '';
+
+    // Nếu chứa Value Pack / Combo / Bundle thì bỏ qua luôn
+    if (preg_match('/\b(Value Pack|Combo|Bundle)\b/i', $name)) {
+        return '';
+    }
+
+    // Xóa cụm -W-[0-9] (package code)
+    $name = preg_replace('/-W-\d+/i', '', $name);
+
+    // Xóa các cụm dạng "2-Pack", "3-Packs", "10-Pack"...
+    $name = preg_replace('/\b\d+\s*-\s*Packs?\b/i', '', $name);
+
+    // Xóa khoảng trắng thừa
+    $name = preg_replace('/\s+/', ' ', $name);
+    $name = trim($name);
+
+    return $name;
+}

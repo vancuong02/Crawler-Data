@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://fhiaba.com/product/35133220/fridge-and-freezer';
+$url = 'https://buythermopro.com/products/tp49w-3-packs-digital-indoor-thermometer-hygrometer';
 
 $type = 'extract';
 // $type = 'updateBySitemap';

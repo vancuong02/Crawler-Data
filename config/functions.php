@@ -314,3 +314,15 @@ function curl_get_v4($url, $headers = array())
     curl_close($ch);
     return $result;
 }
+
+function checkName($name)
+{
+    if (!$name) return '';
+    // Nếu chứa Value Pack / Combo / Bundle thì bỏ qua luôn
+    if (preg_match('/\b(Value Pack|Combo|Bundle)\b/i', $name)) {
+        return '';
+    }
+    // Xóa các cụm dạng "2-Pack", "3-Packs"...
+    $name = preg_replace('/\b\d+\s*-\s*Packs?\b/i', '', $name);
+    return $name;
+}
