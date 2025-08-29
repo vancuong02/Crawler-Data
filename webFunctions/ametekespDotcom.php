@@ -1,74 +1,76 @@
 <?php
-// Website 5. https://moiswell.com/collections/200-pints/products/145-pints-crawl-space-dehumidifier-with-pump-and-drain-hose-moiswell-defender-mp70
+// Website 6. https://www.ametekesp.com/surgex/axess-elite/axess-elite-120-208v
 
-function moiswellDotcom_updateBySitemap($monthsAgo = 3)
+function ametekespDotcom_updateBySitemap($monthsAgo = 3)
 {
-    $urls = array();
-    $urlMaps = array('https://moiswell.com/sitemap.xml');
-    for ($m = 0; $m < count($urlMaps); $m++) {
-        $html = curl_get_v4($urlMaps[$m]);
-        $xml = new SimpleXMLElement($html);
-        foreach ($xml->sitemap as $item) {
-            if (!isset($item->loc)) continue;
-            $url = (string)$item->loc;
-            if (!preg_match("/products/i", $url)) continue;
-            array_push($urls, $url);
-        }
-    }
-    $resultData = extract_bySitemap($urls, 'moiswellDotcom_checkLink', $monthsAgo, 1, 'curl_get_v4');
+    $urls = array('https://www.ametekesp.com/sitemap.xml');
+    $resultData = extract_bySitemap($urls, 'ametekespDotcom_checkLink', $monthsAgo, 1, 'curl_get_v4');
     return $resultData;
 }
 
-function moiswellDotcom_checkLink($link, $urlInfo)
+function ametekespDotcom_checkLink($link, $urlInfo)
 {
     if (!isset($link) || !isset($urlInfo)) return false;
     if (!isset($link) || !isset($urlInfo)) return false;
     if (!$urlInfo || !isset($urlInfo['domain'])) return false;
-    if (!preg_match("/moiswell\.com/i", $urlInfo['domain'])) return false;
-    if (!preg_match("/\/products\//i", $link)) return false;
+    if (!preg_match("/ametekesp\.com/i", $urlInfo['domain'])) return false;
 
-    $blockedSlugs = ['payment-of-the-difference', 'refund-request', 'return'];
-    foreach ($blockedSlugs as $slug) {
-        if (stripos($link, $slug) !== false) {
+    $link = explode('?', $link)[0];
+    $link = explode('#', $link)[0];
+
+    // Điều kiện được coi là link products: path phải có ít nhất 3 phân đoạn
+    $path = parse_url($link, PHP_URL_PATH);
+    $segments = array_filter(explode('/', $path));
+    if (count($segments) < 3) return false;
+
+    // Thêm điều kiện: bỏ các link chứa từ khóa: 'resources', 'about-us', 'contact', 'news'
+    $keywords = ['resources', 'about-us', 'contact', 'news'];
+    foreach ($keywords as $word) {
+        if (stripos($link, $word) !== false) {
             return false;
         }
     }
-    $link = explode('?', $link)[0];
-    return explode('#', $link)[0];
+
+    return $link;
 }
 
-function moiswellDotcom_extractManuals($url, $runAuto = 'Yes')
+function ametekespDotcom_extractManuals($url, $runAuto = 'Yes')
 {
     /*
         - Create: 2025-08-29
     */
 
-    $data = array('brand' => 'Moiswell', 'manualLang' => 'en');
+    $data = array('brand' => 'Ametek', 'manualLang' => 'en');
     $domainUrl = getWebsiteUrl($url);
     if (!$domainUrl) return $data;
 
     $html = curl_get_v4($url);
     // 1. numOfRelatedUrls
-    $data['numOfRelatedUrls'] = count(extract_getRelatedProducts($html, 'moiswellDotcom_checkLink', $domainUrl, 0));
+    $data['numOfRelatedUrls'] = count(extract_getRelatedProducts($html, 'ametekespDotcom_checkLink', $domainUrl, 0));
 
     // 2. Name
     $data['name'] = get_string_between($html, '<h1', '</h1>');
     if ($data['name'] != '') $data['name'] = '<h1' . $data['name'];
     $data['name'] = extract_clearName($data['name']);
-    $data['name'] = checkName($data['name']);
     if (!$data['name']) return $data;
 
     // 3. Model
-    $data['model'] = get_string_between($html, '<br><span style="font-weight: bold;">Model</span>:', '<br>');
+    $data['model'] = get_string_between($html, 'Models:&nbsp;</strong>', '<br />');
     $data['model'] = extract_clearModel($data['model']);
+    $models = explode(',', $data['model']);
+    $models = array_map('trim', $models);
+    $data['model'] = $models[0];
     if ($runAuto == 'Yes' && !$data['model']) return $data;
 
     $data = extract_checkNameAndBrand($data);
 
-    // 4. Related Model - Model Alias: Nothing
+    // 4. Related Model - Model Alias
+    if ($data['model'] && count($models) > 1) {
+        $data['related_model'] =  array_slice($models, 1);
+    }
 
     // 5. Image
-    $img = get_string_between($html, '<meta property="og:image" content="', '"');
+    $img = get_string_between($html, '<img id="phbody_0_phbodycontent_0_ctl06_mainProductImage" class="img-responsive product-image" data-description="Product 1 description" src="', '"');
     if ($img != '') {
         if (substr($img, 0, 2) == '//') $img = 'https:' . $img;
         if (substr($img, 0, 1) == '/') $img = $domainUrl . $img;
@@ -78,36 +80,32 @@ function moiswellDotcom_extractManuals($url, $runAuto = 'Yes')
     // 6. Category
     $category = findCategoryFromName($data['name']);
     if ($category) $data['category'] = $category;
-    if (!isset($data['category'])) $data['category'] = '<200 Pints';
+    if (!isset($data['category'])) $data['category'] = 'Axess ELITE';
 
     // 7. Manual & OtherFiles
     $checkFileExist = array();
-    $manualHtml = get_string_between($html, '<div data-pf-type="Accordion.Content.Wrapper" class="sc-iGgVNO dygSQz pf-122_">', '<div data-pf-type="Accordion.Content.Wrapper" class="sc-iGgVNO dygSQz pf-131_">');
+    $manualHtml = '';
+    if (preg_match('/<div class="child_tablist">(.*)<\/div>\s*<\/div>/sU', $html, $matches)) {
+        $manualHtml = $matches[1];
+    }
     preg_match_all('/<a(.*?)<\/a>/s', $manualHtml, $m);
-    $isManualSection = (stripos($manualHtml, '>Manuals<') !== false);
 
     if ($m != false) {
         for ($j = 0; $j < count($m[0]); $j++) {
             $item = $m[0][$j];
             $itemFile = array();
 
-            // --- URL ---
             $itemFile['file'] = get_string_between($item, 'href="', '"');
             if ($itemFile['file'] == '') $itemFile['file'] = get_string_between($item, "href='", "'");
             $itemFile['file'] = trim($itemFile['file']);
             if (substr($itemFile['file'], 0, 2) == '//') $itemFile['file'] = 'https:' . $itemFile['file'];
             if (substr($itemFile['file'], 0, 1) == '/') $itemFile['file'] = $domainUrl . $itemFile['file'];
             $itemFile['file'] = extract_clearUrl($itemFile['file']);
-
             //$itemFile['file'] = explode('?',$itemFile['file'])[0];
             if (isset($checkFileExist[md5($itemFile['file'])])) continue;
             if (!preg_match("/\.pdf/i", $itemFile['file'])) continue;
 
             $itemFile['name'] = extract_clearItemFileName($item);
-            if ($isManualSection && !preg_match('/manual/i', $itemFile['name'])) {
-                $itemFile['name'] .= ' User Manual';
-            }
-
             if (!$itemFile['name'] || preg_match("/Brochure|energy|warrant|Catalog|Sales/i", $itemFile['name'])) continue;
 
             $itemFile['fileType'] = findTypeOfFileFromString($itemFile['name']);
@@ -131,32 +129,9 @@ function moiswellDotcom_extractManuals($url, $runAuto = 'Yes')
         }
     }
 
-    // 8. Specifications
     $data = extract_recheckManualsUrl($data);
-    $spec = array();
-    $specHtml = get_string_between(
-        $html,
-        '<div data-pf-type="Accordion.Content.Wrapper" class="sc-iGgVNO dygSQz pf-106_">',
-        '</div></div></div></div></div></div>'
-    );
 
-    // Tên (name) nằm trong <span style="font-weight:bold;">…</span> hoặc <strong>…</strong>
-    preg_match_all('/<(?:span|strong)[^>]*>(.*?)<\/(?:span|strong)>\s*:?(&nbsp;)?\s*([^<]*)/is', $specHtml, $matches, PREG_SET_ORDER);
-
-    foreach ($matches as $m) {
-        $name  = extract_clearItemFileName($m[1]);
-        $value = extract_clearItemFileName($m[3]);
-
-        if ($name == '' || $value == '' || $value == 'No' || $value == 'N/A') continue;
-
-        $spec[] = array(
-            'name'  => $name,
-            'value' => $value
-        );
-    }
-    if (count($spec) > 0) {
-        $data['specifications'] = $spec;
-    }
+    // 8. Specifications: Nothing
 
     return $data;
 }

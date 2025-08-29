@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://fhiaba.com/product/35133220/fridge-and-freezer';
+$url = 'https://www.ametekesp.com/surgex/axess-elite/axess-elite-120-208v';
 
 $type = 'extract';
 // $type = 'updateBySitemap';
