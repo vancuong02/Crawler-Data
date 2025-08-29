@@ -105,14 +105,37 @@ function fhiabaDotcom_extractManuals($url, $runAuto = 'Yes')
     }
 
     // 8. Specifications
+    // $data = extract_recheckManualsUrl($data);
+    // $spec = array();
+    // preg_match_all('/<h4 class="third-col-main-title">TECHNICAL DATA<\/h4>(.*?)<\/div>/is', $html, $blocks);
+    // foreach ($blocks[1] as $block) {
+    //     $name = get_string_between($block, '<span class="">', '</span>');
+    //     $name = extract_clearItemFileName($name);
+    //     if ($name == '') continue;
+    //     $value = get_string_between($block, '<span class="attr-value-third-col">', '</span>');
+    //     $value = extract_clearItemFileName($value);
+    //     if ($value == '' || $value == 'No' || $value == 'N/A') continue;
+    //     $spec[] = array(
+    //         'name'  => $name,
+    //         'value' => $value
+    //     );
+    // }
+    // if (count($spec) > 0) {
+    //     $data['specifications'] = $spec;
+    // }
+
     $data = extract_recheckManualsUrl($data);
     $spec = array();
-    preg_match_all('/<h4 class="third-col-main-title">TECHNICAL DATA<\/h4>(.*?)<\/div>/is', $html, $blocks);
-    foreach ($blocks[1] as $block) {
+    preg_match_all('/<div class="third-col-attr" id="(.*?)<\/div>/is', $html, $blocks);
+    foreach ($blocks[0] as $block) {
         $name = get_string_between($block, '<span class="">', '</span>');
+        $name = preg_replace('/<script(.*?)<\/script>/s', "", $name);
+        $name = preg_replace('/<!---(.*?)--->/', "", $name);
         $name = extract_clearItemFileName($name);
         if ($name == '') continue;
         $value = get_string_between($block, '<span class="attr-value-third-col">', '</span>');
+        $value = preg_replace('/<script(.*?)<\/script>/s', "", $value);
+        $value = preg_replace('/<!---(.*?)--->/', "", $value);
         $value = extract_clearItemFileName($value);
         if ($value == '' || $value == 'No' || $value == 'N/A') continue;
         $spec[] = array(
@@ -123,7 +146,6 @@ function fhiabaDotcom_extractManuals($url, $runAuto = 'Yes')
     if (count($spec) > 0) {
         $data['specifications'] = $spec;
     }
-
 
     return $data;
 }

@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://moiswell.com/collections/200-pints/products/145-pints-crawl-space-dehumidifier-with-pump-and-drain-hose-moiswell-defender-mp70';
+$url = 'https://fhiaba.com/product/35133220/fridge-and-freezer';
 
 $type = 'extract';
 // $type = 'updateBySitemap';
