@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://buythermopro.com/products/tp49w-3-packs-digital-indoor-thermometer-hygrometer';
+$url = 'https://www.argendon.com/products/argendon-crawl-space-bundle-shield-35p-dehumidifier-with-remote-control-and-hanging-kit';
 
 $type = 'extract';
 // $type = 'updateBySitemap';
