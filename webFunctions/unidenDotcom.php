@@ -1,52 +1,48 @@
 <?php
-// Website 6. https://www.ametekesp.com/surgex/axess-elite/axess-elite-120-208v
+// Website 7. https://uniden.com/products/homepatrol-2
 
-function ametekespDotcom_updateBySitemap($monthsAgo = 3)
+function unidenDotcom_updateBySitemap($monthsAgo = 3)
 {
-    $urls = array('https://www.ametekesp.com/sitemap.xml');
-    $resultData = extract_bySitemap($urls, 'ametekespDotcom_checkLink', $monthsAgo, 1, 'curl_get_v4');
+    $urls = array();
+    $urlMaps = array('https://uniden.com/sitemap.xml');
+    for ($m = 0; $m < count($urlMaps); $m++) {
+        $html = curl_get_v4($urlMaps[$m]);
+        $xml = new SimpleXMLElement($html);
+        foreach ($xml->sitemap as $item) {
+            if (!isset($item->loc)) continue;
+            $url = (string)$item->loc;
+            if (!preg_match("/products/i", $url)) continue;
+            array_push($urls, $url);
+        }
+    }
+    $resultData = extract_bySitemap($urls, 'unidenDotcom_checkLink', $monthsAgo, 1, 'curl_get_v4');
     return $resultData;
 }
 
-function ametekespDotcom_checkLink($link, $urlInfo)
+function unidenDotcom_checkLink($link, $urlInfo)
 {
     if (!isset($link) || !isset($urlInfo)) return false;
     if (!isset($link) || !isset($urlInfo)) return false;
     if (!$urlInfo || !isset($urlInfo['domain'])) return false;
-    if (!preg_match("/ametekesp\.com/i", $urlInfo['domain'])) return false;
-
+    if (!preg_match("/uniden\.com/i", $urlInfo['domain'])) return false;
+    if (!preg_match("/\/products\//i", $link)) return false;
     $link = explode('?', $link)[0];
-    $link = explode('#', $link)[0];
-
-    // Điều kiện được coi là link products: path phải có ít nhất 3 phân đoạn
-    $path = parse_url($link, PHP_URL_PATH);
-    $segments = array_filter(explode('/', $path));
-    if (count($segments) < 3) return false;
-
-    // Thêm điều kiện: bỏ các link chứa từ khóa: 'resources', 'about-us', 'contact', 'news'
-    $keywords = ['resources', 'about-us', 'contact', 'news'];
-    foreach ($keywords as $word) {
-        if (stripos($link, $word) !== false) {
-            return false;
-        }
-    }
-
-    return $link;
+    return explode('#', $link)[0];
 }
 
-function ametekespDotcom_extractManuals($url, $runAuto = 'Yes')
+function unidenDotcom_extractManuals($url, $runAuto = 'Yes')
 {
     /*
         - Create: 2025-08-29
     */
 
-    $data = array('brand' => 'Ametek', 'manualLang' => 'en');
+    $data = array('brand' => 'Uniden', 'manualLang' => 'en');
     $domainUrl = getWebsiteUrl($url);
     if (!$domainUrl) return $data;
 
     $html = curl_get_v4($url);
     // 1. numOfRelatedUrls
-    $data['numOfRelatedUrls'] = count(extract_getRelatedProducts($html, 'ametekespDotcom_checkLink', $domainUrl, 0));
+    $data['numOfRelatedUrls'] = count(extract_getRelatedProducts($html, 'unidenDotcom_checkLink', $domainUrl, 0));
 
     // 2. Name
     $data['name'] = get_string_between($html, '<h1', '</h1>');
@@ -55,21 +51,16 @@ function ametekespDotcom_extractManuals($url, $runAuto = 'Yes')
     if (!$data['name']) return $data;
 
     // 3. Model
-    $data['model'] = get_string_between($html, 'Models:&nbsp;</strong>', '<br />');
-    $models = explode(',', $data['model']);
-    $models = array_map('extract_clearModel', $models);
-    $data['model'] = $models[0];
+    $data['model'] = get_string_between($html, '<span id="sku-value-template--15542422896698__main">', '</span>');
+    $data['model'] = extract_clearModel($data['model']);
     if ($runAuto == 'Yes' && !$data['model']) return $data;
 
     $data = extract_checkNameAndBrand($data);
 
-    // 4. Related Model - Model Alias
-    if ($data['model'] && count($models) > 1) {
-        $data['related_model'] =  array_slice($models, 1);
-    }
+    // 4. Related Model - Model Alias: Nothing
 
     // 5. Image
-    $img = get_string_between($html, '<img id="phbody_0_phbodycontent_0_ctl06_mainProductImage" class="img-responsive product-image" data-description="Product 1 description" src="', '"');
+    $img = get_string_between($html, '<meta property="og:image" content="', '"');
     if ($img != '') {
         if (substr($img, 0, 2) == '//') $img = 'https:' . $img;
         if (substr($img, 0, 1) == '/') $img = $domainUrl . $img;
@@ -79,14 +70,11 @@ function ametekespDotcom_extractManuals($url, $runAuto = 'Yes')
     // 6. Category
     $category = findCategoryFromName($data['name']);
     if ($category) $data['category'] = $category;
-    if (!isset($data['category'])) $data['category'] = 'Axess ELITE';
+    if (!isset($data['category'])) $data['category'] = 'Radio Scanners';
 
     // 7. Manual & OtherFiles
     $checkFileExist = array();
-    $manualHtml = '';
-    if (preg_match('/<div class="child_tablist">(.*)<\/div>\s*<\/div>/sU', $html, $matches)) {
-        $manualHtml = $matches[1];
-    }
+    $manualHtml = get_string_between($html, '<h4 class="attach-box-main-title">ATTACHED FILES</h4>', '<div id="product-social-links">');
     preg_match_all('/<a(.*?)<\/a>/s', $manualHtml, $m);
 
     if ($m != false) {
@@ -127,8 +115,6 @@ function ametekespDotcom_extractManuals($url, $runAuto = 'Yes')
             }
         }
     }
-
-    $data = extract_recheckManualsUrl($data);
 
     // 8. Specifications: Nothing
 

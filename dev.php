@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://www.ametekesp.com/surgex/axess-elite/axess-elite-120-208v';
+$url = 'https://uniden.com/products/homepatrol-2';
 
 $type = 'extract';
 // $type = 'updateBySitemap';
