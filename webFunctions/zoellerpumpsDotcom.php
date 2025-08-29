@@ -15,12 +15,13 @@ function zoellerpumpsDotcom_updateBySitemap($monthsAgo = 3)
         }
     }
 
-    // Log ra để xem
-    echo "Danh sách product sitemap lấy được:\n";
-    print_r($urls);
+    // echo "Total link product: " . count($resultData) . PHP_EOL;
+    // foreach ($resultData as $link) {
+    //     echo $link . PHP_EOL;
+    // }
 
-    // $resultData = extract_bySitemap($urls, 'zoellerpumpsDotcom_checkLink', $monthsAgo, 1, 'curl_get_v4');
-    // return $resultData;
+    $resultData = extract_bySitemap($urls, 'zoellerpumpsDotcom_checkLink', $monthsAgo, 1, 'curl_get_v4');
+    return $resultData;
 }
 
 function zoellerpumpsDotcom_checkLink($link, $urlInfo)

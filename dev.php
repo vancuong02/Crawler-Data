@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://www.argendon.com/products/argendon-crawl-space-bundle-shield-35p-dehumidifier-with-remote-control-and-hanging-kit';
+$url = 'https://moiswell.com/collections/200-pints/products/145-pints-crawl-space-dehumidifier-with-pump-and-drain-hose-moiswell-defender-mp70';
 
 $type = 'extract';
 // $type = 'updateBySitemap';
