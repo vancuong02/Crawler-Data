@@ -1,89 +1,71 @@
 <?php
-function ninjakitchenDotcoDotuk_updateBySitemap($monthsAgo = 3)
+// Website 9: https://shopping.panasonic.ca/products/home-appliances/rice-cookers/srdl105/product.aspx?ID=78e518be-2480-409a-a880-22c70f2bee62&g=96768f4a-af6a-48be-a21b-c6770e28c7bf&c=16c89151-c4cc-4bca-a424-1ec3093634f5&lang=en
+
+function panasonicDotca_updateBySitemap($monthsAgo = 3)
 {
-    //Tìm sitemap qua robots.txt. ví dụ: https://ninjakitchen.co.uk/robots.txt
-    $urls = array();
-    $urlMaps = array('https://ninjakitchen.co.uk/sitemap-ninja');
-    for ($m = 0; $m < count($urlMaps); $m++) {
-        $html = curl_get($urlMaps[$m]);
-        $xml = new SimpleXMLElement($html);
-        foreach ($xml->sitemap as $item) {
-            if (!isset($item->loc)) continue;
-            $url = (string)$item->loc;
-            if (!preg_match("/product/i", $url)) continue;
-            array_push($urls, $url);
-        }
-    }
-    $resultData = extract_bySitemap($urls, 'ninjakitchenDotcoDotuk_checkLink', $monthsAgo, 1, 'curl_get');
-
-    // echo "Total link product: " . count($resultData) . PHP_EOL;
-    // foreach ($resultData as $link) {
-    //     echo $link . PHP_EOL;
-    // }
-
+    $urls = array('https://shopping.panasonic.ca/sitemap.xml');
+    $resultData = extract_bySitemap($urls, 'panasonicDotca_checkLink', $monthsAgo, 1, 'curl_get_v4');
     return $resultData;
 }
 
-function ninjakitchenDotcoDotuk_checkLink($link, $urlInfo)
+function panasonicDotca_checkLink($link, $urlInfo)
 {
-    //https://ninjakitchen.co.uk/product/ninja-protein-power-pack-creami-blast-bundle-zidNC51BC25UK
     if (!isset($link) || !isset($urlInfo)) return false;
     if (!$urlInfo || !isset($urlInfo['domain'])) return false;
-    if (!preg_match("/ninjakitchen\.co\.uk/i", $urlInfo['domain'])) return false;
-    if (!preg_match("/\/product\//i", $link)) return false;
-    $link = explode('?', $link)[0];
+    if (!preg_match("/panasonic\.ca/i", $urlInfo['domain'])) return false;
+    if (!preg_match("/\/products\//i", $link)) return false;
+    $path = parse_url($link, PHP_URL_PATH);
+    $segments = array_filter(explode('/', $path));
+    if (count($segments) < 5) return false;
+
     return explode('#', $link)[0];
 }
 
-function ninjakitchenDotcoDotuk_extractManuals($url, $runAuto = 'Yes')
+function panasonicDotca_extractManuals($url, $runAuto = 'Yes')
 {
-    /*
-    - https://ninjakitchen.co.uk/product/ninja-protein-power-pack-creami-blast-bundle-zidNC51BC25UK
-    - Edit: 2023-09-05
-    - Edit 2025-08-26
-    */
-    $data = array('brand' => 'Ninja', 'manualLang' => 'en');
+    $data = array('brand' => 'Panasonic', 'manualLang' => 'en');
     $domainUrl = getWebsiteUrl($url);
     if (!$domainUrl) return $data;
 
-    $html = curl_get($url);
-    $data['numOfRelatedUrls'] = count(extract_getRelatedProducts($html, 'ninjakitchenDotcoDotuk_checkLink', $domainUrl, 0));
+    $html = curl_get_v4($url);
+    $data['numOfRelatedUrls'] = count(extract_getRelatedProducts($html, 'panasonicDotca_checkLink', $domainUrl, 0));
 
-    //Name
-    $data['name'] = get_string_between($html, '<h1', '</h1>');
-    if ($data['name'] != '') $data['name'] = '<h1' . $data['name'];
-    $data['name'] = extract_clearName($data['name']);
+    // 1. Name & Model
+    $htmlApplication = get_string_between($html, '<script type="application/ld+json">', '</script>');
+    if ($htmlApplication) {
+        $json = json_decode($htmlApplication, true);
+        if ($json) {
+            $data['name']  = extract_clearName($json['name'] ?? '');
+            $data['model'] = extract_clearModel($json['mpn'] ?? '');
+        }
+    }
     if (!$data['name']) return $data;
-
-    //Model
-    $data['model'] = get_string_between($html, '"sku" : "', '"');
-    $data['model'] = extract_clearModel($data['model']);
     if ($runAuto == 'Yes' && !$data['model']) return $data;
 
     $data = extract_checkNameAndBrand($data);
 
-    //Related Model:
+    // 3. Related Model:
     if ($data['model']) {
         $related_model = preg_replace('/UK$/i', '', $data['model']);
         if ($related_model != $data['model']) $data['related_models'] = array($related_model);
     }
 
-    //Imagesecho $data['model'] ."\n";
-    $img = get_string_between($html, '<meta property="og:image:secure_url" content="', '"');
+    // 4. Image
+    $img = get_string_between($html, '<img id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_Image1" src="', '"');
     if ($img != '') {
         if (substr($img, 0, 2) == '//') $img = 'https:' . $img;
         if (substr($img, 0, 1) == '/') $img = $domainUrl . $img;
         $data['images'] = array(extract_clearUrl($img));
     }
 
-    //Category
+    // 5. Category
     $category = findCategoryFromName($data['name']);
     if ($category) $data['category'] = $category;
-    if (!isset($data['category'])) $data['category'] = 'Kitchen & Bath Fixtures';
+    if (!isset($data['category'])) $data['category'] = 'Rice Cookers';
 
-    //manual
+    // 6. Manual
     $checkFileExist = array();
-    $manualHtml = get_string_between($html, '<ul class="product-attachments">', '</ul>');
+    $manualHtml = get_string_between($html, '<ul class="prod-foot">', '</div>');
     preg_match_all('/<a(.*?)<\/a>/s', $manualHtml, $m);
 
     if ($m != false) {
@@ -125,24 +107,9 @@ function ninjakitchenDotcoDotuk_extractManuals($url, $runAuto = 'Yes')
         }
     }
 
-    //ReDetect manualsUrl.
     $data = extract_recheckManualsUrl($data);
 
-    $spec = array();
-    preg_match_all('/<dd(.*?)<\/dt>/s', $html, $m);
-    for ($j = 0; $j < count($m[0]); $j++) {
-        $item = $m[0][$j];
-        $itemData = array();
-        $itemData['name'] = get_string_between($item, '<dd class="col-xs-8 ish-ca-value">', '</dd>');
-        $itemData['name'] = extract_clearItemFileName($itemData['name']);
-        if ($itemData['name'] == '') continue;
-
-        $itemData['value'] = get_string_between($item, '<dt class="col-xs-4 ish-ca-type">', '</dt>');
-        $itemData['value'] = extract_clearItemFileName($itemData['value']);
-        if ($itemData['value'] == '' || $itemData['value'] == 'No' || $itemData['value'] == 'N/A') continue;
-        array_push($spec, $itemData);
-    }
-    if (count($spec) > 0) $data['specifications'] = $spec;
+    // 7. Specifications: Nothing
 
     return $data;
 }

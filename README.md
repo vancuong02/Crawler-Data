@@ -53,7 +53,7 @@ $data['brand'] = 'ThermoPro';
 
 ## 4. Related Models
 
-- Trường related_models: chứa các model khác có liên quan đến sản phẩm.
+- Trường related_models: chứa các model khác có liên quan đến sản phẩm. Có thể lấy gtin, mpn, sku (nếu khác với model).
 
 - Ý nghĩa: gom nhóm các model khác nhau nhưng có cùng tài liệu hoặc cùng dòng sản phẩm để phục vụ tìm kiếm và hiển thị.
 

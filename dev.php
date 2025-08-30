@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://www.vanguardpower.com/na/en_us/product-catalog/engines/big-block-vtwin-vertical-shaft/40_0-gross-hp_-efietc.html';
+$url = 'https://shopping.panasonic.ca/products/home-appliances/rice-cookers/srdl105/product.aspx?ID=78e518be-2480-409a-a880-22c70f2bee62&g=96768f4a-af6a-48be-a21b-c6770e28c7bf&c=16c89151-c4cc-4bca-a424-1ec3093634f5&lang=en';
 
 $type = 'extract';
 // $type = 'updateBySitemap';
