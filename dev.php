@@ -13,7 +13,7 @@ PHp yeu cầu:
 - Cài curl.
 */
 
-$url = 'https://uniden.com/products/homepatrol-2';
+$url = 'https://www.vanguardpower.com/na/en_us/product-catalog/engines/big-block-vtwin-vertical-shaft/40_0-gross-hp_-efietc.html';
 
 $type = 'extract';
 // $type = 'updateBySitemap';

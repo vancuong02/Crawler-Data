@@ -170,12 +170,14 @@ function zoellerpumpsDotcom_extractManuals($url, $runAuto = 'Yes')
     // ReDetect manualsUrl.
     $data = extract_recheckManualsUrl($data);
     $spec = array();
+
     if (preg_match_all(
-        '/<p class="woocommerce-product-attributes-item__label[^"]*"[^>]*>(.*?)<\/p>\s*<p class="woocommerce-product-attributes-item__value[^"]*"[^>]*>(.*?)<\/p>/is',
+        '/<div[^>]*class="[^"]*divTableCell-sync[^"]*"[^>]*>\s*(?:<strong>)?(.*?)(?:<\/strong>)?\s*<\/div>\s*<div[^>]*class="[^"]*divTableCell-sync[^"]*"[^>]*>(.*?)<\/div>/is',
         $html,
         $matches,
         PREG_SET_ORDER
     )) {
+
         $seen = [];
         foreach ($matches as $m) {
             $name  = extract_clearItemFileName($m[1]);
@@ -192,6 +194,7 @@ function zoellerpumpsDotcom_extractManuals($url, $runAuto = 'Yes')
             }
         }
     }
+
     if (count($spec) > 0) {
         $data['specifications'] = $spec;
     }
