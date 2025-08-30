@@ -202,3 +202,15 @@ function save_manuals_saveLink($data, $priority = 1)
     //curl_post('',$postData);
     return true;
 }
+
+function normalize_productName($name)
+{
+    if (!$name) return '';
+    // Nếu chứa Value Pack / Combo / Bundle thì bỏ qua luôn
+    if (preg_match('/\b(Value Pack|Combo|Bundle)\b/i', $name)) {
+        return '';
+    }
+    // Xóa các cụm dạng "2-Pack", "3-Packs"...
+    $name = preg_replace('/\b\d+\s*-\s*Packs?\b/i', '', $name);
+    return $name;
+}

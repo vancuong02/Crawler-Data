@@ -49,7 +49,7 @@ function buythermoproDotcom_extractManuals($url, $runAuto = 'Yes')
     // $data['name'] = get_string_between($html, '<h1', '</h1>');
     // if ($data['name'] != '') $data['name'] = '<h1' . $data['name'];
     // $data['name'] = extract_clearName($data['name']);
-    // $data['name'] = checkName($data['name']);
+    // $data['name'] = normalize_productName($data['name']);
     // if (!$data['name']) return $data;
 
     // 3. Name & Model
@@ -62,7 +62,7 @@ function buythermoproDotcom_extractManuals($url, $runAuto = 'Yes')
             // Lấy name
             $data['name'] = extract_clearName($variants[0]['name']);
             $variants_name = extract_clearName($variants[0]['name']);
-            $data['name'] = checkName($variants_name);
+            $data['name'] = normalize_productName($variants_name);
 
             // Lấy model từ variant đầu tiên & Xóa cụm -W-[0-9] (package code)
             $variants_sku = extract_clearModel($variants[0]['sku']);

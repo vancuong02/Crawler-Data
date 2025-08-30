@@ -74,8 +74,7 @@ function unidenDotcom_extractManuals($url, $runAuto = 'Yes')
 
     // 7. Manual & OtherFiles
     $checkFileExist = array();
-    $manualHtml = get_string_between($html, '<h4 class="attach-box-main-title">ATTACHED FILES</h4>', '<div id="product-social-links">');
-    preg_match_all('/<a(.*?)<\/a>/s', $manualHtml, $m);
+    preg_match_all('/<a(.*?)<\/a>/s', $html, $m);
 
     if ($m != false) {
         for ($j = 0; $j < count($m[0]); $j++) {

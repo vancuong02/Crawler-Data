@@ -50,7 +50,7 @@ function argendonDotcom_extractManuals($url, $runAuto = 'Yes')
     $data['name'] = get_string_between($html, '<h1', '</h1>');
     if ($data['name'] != '') $data['name'] = '<h1' . $data['name'];
     $data['name'] = extract_clearName($data['name']);
-    $data['name'] = checkName($data['name']);
+    $data['name'] = normalize_productName($data['name']);
     if (!$data['name']) return $data;
 
     // 3. Model

@@ -142,8 +142,6 @@ function curl_get_v2($url, $headers = array(), $headerOrigin = '')
 
 function curl_get_v3($url, $headers = array())
 {
-    $parts = parse_url($url);
-    $host = $parts['host'];
     $ch = curl_init();
     $headerDf = array(
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -287,7 +285,7 @@ function curl_get_v4($url, $headers = array())
     $ch = curl_init();
     $headerDf = array(
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language: en-US,en;q=0.9',
+        'Accept-Language: en-US,en;q=0.9,vi;q=0.8,la;q=0.7',
         'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
     );
 
@@ -313,16 +311,4 @@ function curl_get_v4($url, $headers = array())
 
     curl_close($ch);
     return $result;
-}
-
-function checkName($name)
-{
-    if (!$name) return '';
-    // Nếu chứa Value Pack / Combo / Bundle thì bỏ qua luôn
-    if (preg_match('/\b(Value Pack|Combo|Bundle)\b/i', $name)) {
-        return '';
-    }
-    // Xóa các cụm dạng "2-Pack", "3-Packs"...
-    $name = preg_replace('/\b\d+\s*-\s*Packs?\b/i', '', $name);
-    return $name;
 }
